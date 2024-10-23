@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="15.1">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>430</x>
+      <y>130</y>
+      <w>210</w>
+      <h>190</h>
+    </coordinates>
+    <panel_attributes>Tour
+--
+-id: UUID
+-name: String
+-price: Long
+-schedule: LocalDateTime
+--
+
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>90</x>
+      <y>130</y>
+      <w>210</w>
+      <h>190</h>
+    </coordinates>
+    <panel_attributes>Genre
+--
+-id: UUID
+-name:  
+--
+
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>290</x>
+      <y>210</y>
+      <w>160</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=1
+m2=0..n
+type &gt;</panel_attributes>
+    <additional_attributes>10.0;20.0;140.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>820</x>
+      <y>130</y>
+      <w>210</w>
+      <h>190</h>
+    </coordinates>
+    <panel_attributes>Place
+--
+-id: UUID
+-name: String
+-address: String
+-phone: String
+-coordinates: String
+-image: String
+--
+sumConcerts: int
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>630</x>
+      <y>190</y>
+      <w>210</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=1
+m2=0..n
+contains &gt;</panel_attributes>
+    <additional_attributes>190.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>400</x>
+      <y>430</y>
+      <w>280</w>
+      <h>230</h>
+    </coordinates>
+    <panel_attributes>ScraperService
+--
+-url: String
+-instance: ScraperService
+--
++scrapElement(selector: String): String
++analyzePlaces(url String): List&lt;Place&gt;
++analyzeFestivals(url String): List&lt;Place&gt;
++analyzeDate(): List&lt;Concert&gt;
++analyzeConcert(): Concert
++addGenres(): List&lt;Genre&gt;
++analyzeGenre(): List&lt;Concert&gt;
++analyzeSite(): List&lt;Concert&gt;
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>
