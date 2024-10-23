@@ -28,6 +28,10 @@ public class Concert{
 	private UUID id;
 
 	//--------------construct--------------\\
+    public Concert (){
+        // empty construct for the ORM
+    }
+
 	public Concert (LocalDateTime schedule, Long price, String name, UUID id){
 		this.schedule = schedule;
 		this.price = price;

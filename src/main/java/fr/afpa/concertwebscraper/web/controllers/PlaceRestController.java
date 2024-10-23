@@ -7,7 +7,7 @@ import fr.afpa.concertwebscraper.repositories.ConcertRepository;
 import fr.afpa.concertwebscraper.repositories.PlaceRepository;
 import fr.afpa.concertwebscraper.services.ScraperService;
 import fr.afpa.concertwebscraper.entities.Concert;
-
+import fr.afpa.concertwebscraper.entities.Place;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,14 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/api/concerts")
-public class ConcertRestController {
+@RequestMapping("/api/places")
+public class PlaceRestController {
  
-    private ConcertRepository concertRepository;
     private PlaceRepository placeRepository;
 
-    public ConcertRestController(ConcertRepository concertRepository, PlaceRepository placeRepository) {
-        this.concertRepository = concertRepository;
+    public PlaceRestController(PlaceRepository placeRepository) {
         this.placeRepository = placeRepository;
     }
 
@@ -33,8 +31,8 @@ public class ConcertRestController {
     //     return (List<Account>) accountRepository.findAll(); 
     // }
     @GetMapping
-    public List<Concert> getAll() throws IOException {
-        return (List<Concert>) concertRepository.findAll(); 
+    public List<Place> getAll() throws IOException {
+        return (List<Place>) placeRepository.findAll(); 
     }
 
    

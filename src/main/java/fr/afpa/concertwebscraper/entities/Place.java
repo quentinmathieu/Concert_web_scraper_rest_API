@@ -32,6 +32,11 @@ public class Place{
 	private UUID id;
 
 	//--------------construct--------------\\
+
+    public Place(){
+        // empty for the ORM
+    }
+
 	public Place (String image, String address, String phone, String name, String coordinates, UUID id){
 		this.image = image;
 		this.address = address;
@@ -39,6 +44,9 @@ public class Place{
 		this.name = name;
 		this.coordinates = coordinates;
 		this.id = id;
+	}
+	public Place (String name){
+		this.name = name;
 	}
 
 	//--------------getters & setters--------------\\
