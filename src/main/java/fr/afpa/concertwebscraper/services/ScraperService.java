@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import fr.afpa.concertwebscraper.entities.Concert;
+import fr.afpa.concertwebscraper.entities.Genre;
 import fr.afpa.concertwebscraper.entities.Place;
 import fr.afpa.concertwebscraper.repositories.ConcertRepository;
+import fr.afpa.concertwebscraper.repositories.GenreRepository;
 import fr.afpa.concertwebscraper.repositories.PlaceRepository;
 
 
@@ -22,14 +24,16 @@ import fr.afpa.concertwebscraper.repositories.PlaceRepository;
 public class ScraperService{
     private PlaceRepository placeRepository;
     private ConcertRepository concertRepository;
+    private GenreRepository genreRepository;
 	private String baseUrl;
 
 	//--------------construct--------------\\
-	public ScraperService (PlaceRepository placeRepository, ConcertRepository concertRepository) throws IOException{
+	public ScraperService (PlaceRepository placeRepository, ConcertRepository concertRepository, GenreRepository genreRepository) throws IOException{
         super();
         this.placeRepository = placeRepository;
 		this.baseUrl = "http://www.tyzicos.com";
         this.concertRepository = concertRepository;
+        this.genreRepository = genreRepository;
         this.analyzeSite();
 	}
 
@@ -48,17 +52,19 @@ public class ScraperService{
 	}
 
 	public List<Place> analyzePlaces(String urlEnd, Boolean isFestival) throws IOException{
-
+        List<Place> places = new ArrayList<>();
         Document doc = Jsoup.connect(this.baseUrl+urlEnd).get();
 		doc.select("#block-system-main ul li a").forEach(place -> {
             try {
                 if (place != null && place.attr("href") != null){
-                    this.analyzePlace(place.attr("href"), isFestival);
+                    Place newPlace = this.analyzePlace(place.attr("href"), isFestival);
+                    places.add(newPlace);
                 }
             } catch (IOException e) {
+                e.printStackTrace();
             }
         });
-        return new ArrayList<>();
+        return places;
 	}
 
     public Place analyzePlace(String urlEnd, Boolean isFestival) throws IOException{
@@ -94,7 +100,7 @@ public class ScraperService{
             for (Element dateConcerts : doc.select("#block-tyzicos-block-concerts-par-date-et-lieu .date-row")){
                 // create each concert
                 for (Element oneConcert : dateConcerts.select(".one-concert")) {
-                    Concert newConcert = this.createConcert(oneConcert, place, ScraperService.parseDateTime(dateConcerts.select(".day-num").text(), dateConcerts.select(".month").text(), dateConcerts.select(".year").text(), oneConcert.select(".heure span").text()));
+                    this.createConcert(oneConcert, place, ScraperService.parseDateTime(dateConcerts.select(".day-num").text(), dateConcerts.select(".month").text(), dateConcerts.select(".year").text(), oneConcert.select(".heure span").text()));
                 }
             }
             place.setIsFestival(isFestival);
@@ -132,16 +138,64 @@ public class ScraperService{
         }
     }
 
-	// public List<Genre> addGenres(){
-	// }
+    public List<Genre> analyzeGenres() throws IOException {
+        String urlEnd = "/concerts-par-style";
+        List<Genre> genres = new ArrayList<>();
+        Document doc = Jsoup.connect(this.baseUrl+urlEnd).get();
+		doc.select("#block-system-main ul li a").forEach(genre -> {
+            if (genre != null && genre.attr("href") != null){
+                Genre newGenre;
+                try {
+                    newGenre = this.analyzeGenre(genre.attr("href"));
+                    genres.add(newGenre);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        return genres;
+	}
 
-	// public List<Concert> analyzeGenre(){
-	// }
+	public Genre analyzeGenre(String urlEnd) throws IOException{
+        Genre genre = new Genre();
+        Document doc = Jsoup.connect(this.baseUrl+urlEnd).get();
+        // get title if exist
+        if (doc.select(".columns h1") != null && doc.select(".columns h1").first() != null) {
+            genre.setName(HtmlUtils.htmlEscape(doc.select(".columns h1").first().text()));
+            genreRepository.save(genre);
+            // for each date
+            for (Element dateConcerts : doc.select("#block-tyzicos-block-concerts-par-date .date-row")){
+                // add genre to each concert
+                for (Element oneConcert : dateConcerts.select(".one-concert")) {
+                    try {
+                        Concert concert = concertRepository.findByNameAndSchedule(HtmlUtils.htmlEscape(oneConcert.select(".titre").first().text()), ScraperService.parseDateTime(dateConcerts.select(".day-num").text(), dateConcerts.select(".month").text(), dateConcerts.select(".year").text(), oneConcert.select(".heure span").text()));
+                        this.addGenreToConcert(genre, concert);
+                    }
+                    catch(Exception e){
+                        Concert name = (concertRepository.findByName(HtmlUtils.htmlEscape(oneConcert.select(".titre").first().text())));
+                        Concert schedule = (concertRepository.findBySchedule(ScraperService.parseDateTime(dateConcerts.select(".day-num").text(), dateConcerts.select(".month").text(), dateConcerts.select(".year").text(), oneConcert.select(".heure span").text())));
+                        e.printStackTrace();
+                    }
+                   
+                }
+            }
+        }
+        genreRepository.save(genre);
+        return genre;
+	}
+
+    public List<Concert> addGenreToConcert(Genre genre, Concert concert){
+        List<Concert> concerts = new ArrayList<>();
+        concert.setGenre(genre);
+        this.concertRepository.save(concert);
+        concerts.add(concert);
+        return concerts;
+	}
 
 	public void analyzeSite() throws IOException{
         // this.analyzePlaces("/concerts-salles-bars/bretagne", false);
-        this.analyzePlaces("/concerts-par-festivals/bretagne", true);
-        // this.analyzePlace("/lieu-concerts/le-sterenn", false);
+        // this.analyzePlaces("/concerts-par-festivals/bretagne", true);
+        // this.analyzeGenres();
 	}
 
     public static LocalDateTime parseDateTime(String dayNum, String month, String year, String time){

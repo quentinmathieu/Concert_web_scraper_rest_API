@@ -38,6 +38,10 @@ public class Concert{
 	@JoinColumn(name="place_id")
 	private Place place;
 
+	@ManyToOne()
+	@JoinColumn(name="genre_id")
+	private Genre genre;
+
 	//--------------construct--------------\\
     public Concert (){
         // empty construct for the ORM
@@ -102,6 +106,16 @@ public class Concert{
 		this.maxPrice = maxPrice;
 	}
 	
+
+
+	public Genre getGenre() {
+		return this.genre;
+	}
+
+	public void setGenre(Genre genre) {
+		this.genre = genre;
+	}
+
 
 	@Override
 	public String toString() {
