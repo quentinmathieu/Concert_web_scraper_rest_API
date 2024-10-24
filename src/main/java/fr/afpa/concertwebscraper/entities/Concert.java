@@ -8,11 +8,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name="concert")
 public class Concert{
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
 
     @Column(name = "schedule")
 	private LocalDateTime schedule;
@@ -23,9 +28,9 @@ public class Concert{
     @Column(name = "name")
 	private String name;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-	private UUID id;
+	@ManyToOne()
+	@JoinColumn(name="place_id")
+	private Place place;
 
 	//--------------construct--------------\\
     public Concert (){

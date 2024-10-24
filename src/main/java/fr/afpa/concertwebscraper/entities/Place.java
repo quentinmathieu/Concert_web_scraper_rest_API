@@ -1,5 +1,6 @@
 package fr.afpa.concertwebscraper.entities;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -7,11 +8,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name="place")
 public class Place{
+	@Id
+	@Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
+
     @Column(name = "image")
 	private String image;
 
@@ -27,27 +35,17 @@ public class Place{
     @Column(name = "coordinates")
 	private String coordinates;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-	private UUID id;
+	@OneToMany(mappedBy = "place")
+	private List<Concert> concerts;
+
+	@Column(name = "isFestival")
+	private Boolean isFestival = false;
 
 	//--------------construct--------------\\
 
     public Place(){
-        // empty for the ORM
+        // empty for ORM
     }
-
-	public Place (String image, String address, String phone, String name, String coordinates, UUID id){
-		this.image = image;
-		this.address = address;
-		this.phone = phone;
-		this.name = name;
-		this.coordinates = coordinates;
-		this.id = id;
-	}
-	public Place (String name){
-		this.name = name;
-	}
 
 	//--------------getters & setters--------------\\
 	public String getImage(){
@@ -99,8 +97,21 @@ public class Place{
 	}
 
 
+	public Boolean isIsFestival() {
+		return this.isFestival;
+	}
+
+	public Boolean getIsFestival() {
+		return this.isFestival;
+	}
+
+	public void setIsFestival(Boolean isFestival) {
+		this.isFestival = isFestival;
+	}
+
 	public int sumConcerts(){
         return 0;
 	}
+
 }
 
