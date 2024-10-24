@@ -3,6 +3,7 @@ package fr.afpa.concertwebscraper.services;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jsoup.Jsoup;
@@ -112,8 +113,24 @@ public class ScraperService{
         concert.setPlace(place);
         concert.setName(HtmlUtils.htmlEscape(oneConcert.select(".titre").first().text()));
         concert.setPrice(oneConcert.select(".prix span").text());
+        ScraperService.managePrice(concert);
         return concertRepository.save(concert);
 	}
+
+    public static void managePrice(Concert concert){
+        if (concert.getPrice().contains("-")){
+            String[]priceArray = concert.getPrice().split("-");
+            int minPrice = Integer.parseInt(priceArray[0].replaceAll("\\D", ""));
+            int maxPrice = Integer.parseInt(priceArray[1].replaceAll("\\D", ""));
+            concert.setMinPrice(minPrice);
+            concert.setMaxPrice(maxPrice);
+        }
+        else if(concert.getPrice().contains("€")){
+            int price = Integer.parseInt(concert.getPrice().replaceAll("\\D", ""));
+            concert.setMinPrice(price);
+            concert.setMaxPrice(price);
+        }
+    }
 
 	// public List<Genre> addGenres(){
 	// }

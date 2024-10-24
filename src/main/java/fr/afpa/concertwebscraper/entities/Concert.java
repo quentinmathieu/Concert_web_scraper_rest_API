@@ -26,10 +26,10 @@ public class Concert{
 	private String price;
 
     @Column(name = "min_price")
-	private Long minPrice;
+	private int minPrice;
 
     @Column(name = "max_price")
-	private Long maxPrice;
+	private int maxPrice;
 
     @Column(name = "name", columnDefinition = "TEXT")
 	private String name;
@@ -86,19 +86,19 @@ public class Concert{
 	}
 
 
-	public Long getMinPrice() {
+	public int getMinPrice() {
 		return this.minPrice;
 	}
 
-	public void setMinPrice(Long minPrice) {
+	public void setMinPrice(int minPrice) {
 		this.minPrice = minPrice;
 	}
 
-	public Long getMaxPrice() {
+	public int getMaxPrice() {
 		return this.maxPrice;
 	}
 
-	public void setMaxPrice(Long maxPrice) {
+	public void setMaxPrice(int maxPrice) {
 		this.maxPrice = maxPrice;
 	}
 	
