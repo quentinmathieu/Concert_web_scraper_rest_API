@@ -23,9 +23,15 @@ public class Concert{
 	private LocalDateTime schedule;
 
     @Column(name = "price")
-	private Long price;
+	private String price;
 
-    @Column(name = "name")
+    @Column(name = "min_price")
+	private Long minPrice;
+
+    @Column(name = "max_price")
+	private Long maxPrice;
+
+    @Column(name = "name", columnDefinition = "TEXT")
 	private String name;
 
 	@ManyToOne()
@@ -37,13 +43,6 @@ public class Concert{
         // empty construct for the ORM
     }
 
-	public Concert (LocalDateTime schedule, Long price, String name, UUID id){
-		this.schedule = schedule;
-		this.price = price;
-		this.name = name;
-		this.id = id;
-	}
-
 	//--------------getters & setters--------------\\
 	public LocalDateTime getSchedule(){
 		 return this.schedule;
@@ -53,11 +52,11 @@ public class Concert{
 		this.schedule = schedule;
 	}
 
-	public Long getPrice(){
+	public String getPrice(){
 		 return this.price;
 	}
 
-	public void setPrice (Long price){
+	public void setPrice (String price){
 		this.price = price;
 	}
 
@@ -77,5 +76,37 @@ public class Concert{
 		this.id = id;
 	}
 
+
+	public Place getPlace() {
+		return this.place;
+	}
+
+	public void setPlace(Place place) {
+		this.place = place;
+	}
+
+
+	public Long getMinPrice() {
+		return this.minPrice;
+	}
+
+	public void setMinPrice(Long minPrice) {
+		this.minPrice = minPrice;
+	}
+
+	public Long getMaxPrice() {
+		return this.maxPrice;
+	}
+
+	public void setMaxPrice(Long maxPrice) {
+		this.maxPrice = maxPrice;
+	}
+	
+
+	@Override
+	public String toString() {
+		return "Concert [id=" + id + ", schedule=" + schedule + ", price=" + price + ", name=" + name + ", place="
+				+ place + "]";
+	}
 }
 

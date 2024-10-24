@@ -1,12 +1,14 @@
 package fr.afpa.concertwebscraper.web.controllers;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import fr.afpa.concertwebscraper.repositories.PlaceRepository;
 import fr.afpa.concertwebscraper.entities.Place;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,19 +23,15 @@ public class PlaceRestController {
         this.placeRepository = placeRepository;
     }
 
-    // @GetMapping
-    // public List<Account> getAll() {
-    //     return (List<Account>) accountRepository.findAll(); 
-    // }
     @GetMapping
-    public List<Place> getAll() throws IOException {
+    public List<Place> getAll() {
         return (List<Place>) placeRepository.findAll(); 
     }
 
    
-    // @GetMapping("/{id}")
-    // public Optional<Account> getOne(@PathVariable long id) {
-    //     return accountRepository.findById(id);
-    // }
+    @GetMapping("/{id}")
+    public Optional<Place> getOne(@PathVariable UUID id) {
+        return placeRepository.findById(id);
+    }
 
 }

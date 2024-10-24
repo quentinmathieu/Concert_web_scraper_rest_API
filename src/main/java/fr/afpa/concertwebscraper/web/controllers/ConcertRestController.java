@@ -1,12 +1,14 @@
 package fr.afpa.concertwebscraper.web.controllers;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import fr.afpa.concertwebscraper.repositories.ConcertRepository;
-import fr.afpa.concertwebscraper.repositories.PlaceRepository;
 import fr.afpa.concertwebscraper.entities.Concert;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,26 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConcertRestController {
  
     private ConcertRepository concertRepository;
-    private PlaceRepository placeRepository;
 
-    public ConcertRestController(ConcertRepository concertRepository, PlaceRepository placeRepository) {
+    public ConcertRestController(ConcertRepository concertRepository) {
         this.concertRepository = concertRepository;
-        this.placeRepository = placeRepository;
     }
 
-    // @GetMapping
-    // public List<Account> getAll() {
-    //     return (List<Account>) accountRepository.findAll(); 
-    // }
     @GetMapping
     public List<Concert> getAll() {
         return (List<Concert>) concertRepository.findAll(); 
     }
 
    
-    // @GetMapping("/{id}")
-    // public Optional<Account> getOne(@PathVariable long id) {
-    //     return accountRepository.findById(id);
-    // }
+    @GetMapping("/{id}")
+    public Optional<Concert> getOne(@PathVariable UUID id) {
+        return concertRepository.findById(id);
+    }
 
 }

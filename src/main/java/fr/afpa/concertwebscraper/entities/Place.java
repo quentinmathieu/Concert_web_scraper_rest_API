@@ -3,6 +3,8 @@ package fr.afpa.concertwebscraper.entities;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,6 +38,7 @@ public class Place{
 	private String coordinates;
 
 	@OneToMany(mappedBy = "place")
+	@JsonIgnoreProperties({"place"})
 	private List<Concert> concerts;
 
 	@Column(name = "isFestival")
@@ -111,6 +114,20 @@ public class Place{
 
 	public int sumConcerts(){
         return 0;
+	}
+
+	public List<Concert> getConcerts() {
+		return this.concerts;
+	}
+
+	public void setConcerts(List<Concert> concerts) {
+		this.concerts = concerts;
+	}
+
+
+
+	public void addConcert(Concert concert){
+		this.concerts.add(concert);
 	}
 
 }
