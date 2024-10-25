@@ -172,8 +172,6 @@ public class ScraperService{
                         this.addGenreToConcert(genre, concert);
                     }
                     catch(Exception e){
-                        Concert name = (concertRepository.findByName(HtmlUtils.htmlEscape(oneConcert.select(".titre").first().text())));
-                        Concert schedule = (concertRepository.findBySchedule(ScraperService.parseDateTime(dateConcerts.select(".day-num").text(), dateConcerts.select(".month").text(), dateConcerts.select(".year").text(), oneConcert.select(".heure span").text())));
                         e.printStackTrace();
                     }
                    
