@@ -191,9 +191,12 @@ public class ScraperService{
 	}
 
 	public void analyzeSite() throws IOException{
-        // this.analyzePlaces("/concerts-salles-bars/bretagne", false);
-        // this.analyzePlaces("/concerts-par-festivals/bretagne", true);
-        // this.analyzeGenres();
+        // analyze pages only if the db is empty
+        if (((List<Concert>) concertRepository.findAll()).isEmpty()){
+            this.analyzePlaces("/concerts-salles-bars/bretagne", false);
+            this.analyzePlaces("/concerts-par-festivals/bretagne", true);
+            this.analyzeGenres();
+        }
 	}
 
     public static LocalDateTime parseDateTime(String dayNum, String month, String year, String time){
