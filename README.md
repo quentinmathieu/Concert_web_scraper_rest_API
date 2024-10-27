@@ -1,6 +1,6 @@
 # Concert web scraper rest API
 
-Web scraping project. Fetch concerts schedule from Bretagne, France and turns it into a rest API.
+Web scraping project. Fetch concert schedules from Bretagne, France and turns it into a rest API.
 
 
 ## 🛠️ Installation Steps:
