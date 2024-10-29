@@ -3,12 +3,12 @@ package fr.afpa.concertwebscraper.services;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -47,10 +47,6 @@ public class ScraperService{
 	}
 
 
-	public String scrapElement(String selector) throws IOException{
-        return "";
-	}
-
 	public List<Place> analyzePlaces(String urlEnd, Boolean isFestival) throws IOException{
         List<Place> places = new ArrayList<>();
         Document doc = Jsoup.connect(this.baseUrl+urlEnd).get();
@@ -70,21 +66,28 @@ public class ScraperService{
     public Place analyzePlace(String urlEnd, Boolean isFestival) throws IOException{
         Document doc = Jsoup.connect(this.baseUrl+urlEnd).get();
         // get title if exist
-        if (doc.select(".title h1") != null && doc.select(".title h1").first() != null) {
+        Elements titleContainer = doc.select(".title h1");
+        if (titleContainer != null && titleContainer.first() != null) {
             Place place = new Place();
-            place.setName(doc.select(".title h1").first().text());
+            // get place from db if already exist
+            if (placeRepository.findFirstByName(getFirstText(doc, ".title h1")).isPresent()){
+                place = placeRepository.findFirstByName(getFirstText(doc, ".title h1")).get();
+            }
+            else{
+                place.setName(removeTags(getFirstText(doc, ".title h1")));
+                this.placeRepository.save(place);
+            }
             // get address
-            this.placeRepository.save(place);
-            if (doc.select(".adress span") != null && doc.select(".adress span").first() != null) {
-                place.setAddress(doc.select(".adress span").first().text());
+            if (doc.select(".adress span") != null && doc.select(".adress span").first() != null && getFirstText(doc, ".adress span") != null) {
+                place.setAddress(getFirstText(doc, ".adress span"));
                 // get phone if exist
-                if (doc.select(".adress span").size() > 1 && doc.select(".adress span").get(1) != null){
-                    place.setPhone(doc.select(".adress span").get(1).text());
+                if (doc.select(".adress .tel") != null && doc.select(".adress .tel").first() != null){
+                    place.setPhone(getFirstText(doc, ".adress .tel"));
                 }
             }
 
             // get img if exist
-            if (doc.select(".visuelLieu") != null && doc.select(".visuelLieu").first() != null){
+            if (doc.select(".visuelLieu") != null && doc.select(".visuelLieu").first() != null && getFirstText(doc, ".visuelLieu") != null){
                 // extract img from the css class
                 String style = doc.select(".visuelLieu").first().attr("style");
                 place.setImage( style.substring( style.indexOf("http://"), style.indexOf("')") ) );
@@ -109,18 +112,29 @@ public class ScraperService{
         return null;
     }
 
-    
+    public static String getFirstText(Element parent, String selector){
+        return removeTags(parent.select(selector).first().text());
+    }
 
+    public static String removeTags(String string){
+        return HtmlUtils.htmlUnescape(HtmlUtils.htmlEscape(string));
+    }
    
 	public Concert createConcert(Element oneConcert, Place place, LocalDateTime schedule){
-        Concert concert = new Concert();
-
-        concert.setSchedule(schedule);
-        concert.setPlace(place);
-        concert.setName(HtmlUtils.htmlEscape(oneConcert.select(".titre").first().text()));
-        concert.setPrice(oneConcert.select(".prix span").text());
-        ScraperService.managePrice(concert);
-        return concertRepository.save(concert);
+        String title = getFirstText(oneConcert, ".titre");
+        //  Do nothing if event is already in db
+        if (concertRepository.findFirstByNameAndScheduleAndPlace(title, schedule, place).isPresent()){
+            return null;
+        }
+        else{
+            Concert concert = new Concert();
+            concert.setSchedule(schedule);
+            concert.setPlace(place);
+            concert.setName(removeTags(title));
+            concert.setPrice(oneConcert.select(".prix span").text());
+            ScraperService.managePrice(concert);
+            return concertRepository.save(concert);
+        }
 	}
 
     public static void managePrice(Concert concert){
@@ -160,15 +174,21 @@ public class ScraperService{
         Genre genre = new Genre();
         Document doc = Jsoup.connect(this.baseUrl+urlEnd).get();
         // get title if exist
-        if (doc.select(".columns h1") != null && doc.select(".columns h1").first() != null) {
-            genre.setName(HtmlUtils.htmlEscape(doc.select(".columns h1").first().text()));
-            genreRepository.save(genre);
+        Elements titleContainer = doc.select(".columns h1");
+        if (titleContainer != null && titleContainer.first() != null) {
+            if (genreRepository.findFirstByName(getFirstText(doc, ".columns h1")).isPresent()){
+                genre = genreRepository.findFirstByName(getFirstText(doc, ".columns h1")).get();
+            }
+            else{
+                genre.setName(getFirstText(doc, ".columns h1"));
+                genreRepository.save(genre);
+            }
             // for each date
             for (Element dateConcerts : doc.select("#block-tyzicos-block-concerts-par-date .date-row")){
                 // add genre to each concert
                 for (Element oneConcert : dateConcerts.select(".one-concert")) {
                     try {
-                        Concert concert = concertRepository.findByNameAndSchedule(HtmlUtils.htmlEscape(oneConcert.select(".titre").first().text()), ScraperService.parseDateTime(dateConcerts.select(".day-num").text(), dateConcerts.select(".month").text(), dateConcerts.select(".year").text(), oneConcert.select(".heure span").text()));
+                        Concert concert = concertRepository.findFirstByNameAndSchedule(getFirstText(oneConcert, ".titre"), ScraperService.parseDateTime(dateConcerts.select(".day-num").text(), dateConcerts.select(".month").text(), dateConcerts.select(".year").text(), oneConcert.select(".heure span").text())).get();
                         this.addGenreToConcert(genre, concert);
                     }
                     catch(Exception e){
@@ -192,11 +212,12 @@ public class ScraperService{
 
 	public void analyzeSite() throws IOException{
         // analyze pages only if the db is empty
-        if (((List<Concert>) concertRepository.findAll()).isEmpty()){
-            this.analyzePlaces("/concerts-salles-bars/bretagne", false);
-            this.analyzePlaces("/concerts-par-festivals/bretagne", true);
-            this.analyzeGenres();
-        }
+        // this.analyzePlaces("/concerts-salles-bars/bretagne", false);
+        // this.analyzePlaces("/concerts-par-festivals/bretagne", true);
+        this.analyzeGenres();
+
+
+        // this.analyzePlace("/lieu-concerts/baleine-deshydratee-0", true);
 	}
 
     public static LocalDateTime parseDateTime(String dayNum, String month, String year, String time){
