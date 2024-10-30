@@ -1,6 +1,13 @@
 package fr.afpa.concertwebscraper.services;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +19,9 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fr.afpa.concertwebscraper.entities.Concert;
 import fr.afpa.concertwebscraper.entities.Genre;
 import fr.afpa.concertwebscraper.entities.Place;
@@ -20,8 +30,10 @@ import fr.afpa.concertwebscraper.repositories.GenreRepository;
 import fr.afpa.concertwebscraper.repositories.PlaceRepository;
 
 
+
 @Service
 public class ScraperService{
+    
     private PlaceRepository placeRepository;
     private ConcertRepository concertRepository;
     private GenreRepository genreRepository;
@@ -63,6 +75,47 @@ public class ScraperService{
         return places;
 	}
 
+    public String fetchCoordinates(String address){
+        address = address.replace("[^A-Za-z0-9\\s]", " ");
+        address = address.replace("'", " ");
+        address = address.replace(" ", "%20");
+        address = Normalizer.normalize(address, Normalizer.Form.NFD);
+        address = address.replaceAll("[^\\p{ASCII}]", "");
+        address = address.replaceAll("[^A-Za-z0-9%]", "");
+        try {
+            @SuppressWarnings("deprecation")
+            URL url = new URL("https://api-adresse.data.gouv.fr/search/?q="+address+"&autocomplete=1");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            connection.setRequestMethod("GET");
+            InputStream in = new BufferedInputStream(connection.getInputStream());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            var result = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+
+            // Jackson main object
+            ObjectMapper mapper = new ObjectMapper();
+
+            // read the json strings and convert it into JsonNode
+            JsonNode node = mapper.readTree(result.toString());
+
+            String lat = node.get("features").get(0).get("geometry").get("coordinates").get(1).toString();
+            String lon = node.get("features").get(0).get("geometry").get("coordinates").get(0).toString();
+            return lat+";"+lon;
+        } 
+        catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } 
+        
+    }
+    
+
     public Place analyzePlace(String urlEnd, Boolean isFestival) throws IOException{
         Document doc = Jsoup.connect(this.baseUrl+urlEnd).get();
         // get title if exist
@@ -77,9 +130,11 @@ public class ScraperService{
                 place.setName(removeTags(getFirstText(doc, ".title h1")));
                 this.placeRepository.save(place);
             }
+            String address = null;
             // get address
             if (doc.select(".adress span") != null && doc.select(".adress span").first() != null && getFirstText(doc, ".adress span") != null) {
-                place.setAddress(getFirstText(doc, ".adress span"));
+                address = getFirstText(doc, ".adress span");
+                place.setAddress(address);
                 // get phone if exist
                 if (doc.select(".adress .tel") != null && doc.select(".adress .tel").first() != null){
                     place.setPhone(getFirstText(doc, ".adress .tel"));
@@ -98,6 +153,12 @@ public class ScraperService{
                 if (coordString.length() > 20){
                     place.setCoordinates(coordString);
                 }
+                else if (address != null){
+                    place.setCoordinates(fetchCoordinates(address));
+                }
+            }
+            else if (address != null){
+                place.setCoordinates(fetchCoordinates(address));
             }
             // for each date
             for (Element dateConcerts : doc.select("#block-tyzicos-block-concerts-par-date-et-lieu .date-row")){
@@ -212,8 +273,8 @@ public class ScraperService{
 
 	public void analyzeSite() throws IOException{
         // analyze pages only if the db is empty
-        // this.analyzePlaces("/concerts-salles-bars/bretagne", false);
-        // this.analyzePlaces("/concerts-par-festivals/bretagne", true);
+        this.analyzePlaces("/concerts-par-festivals/bretagne", true);
+        this.analyzePlaces("/concerts-salles-bars/bretagne", false);
         // this.analyzeGenres();
 
 

@@ -1,5 +1,7 @@
 package fr.afpa.concertwebscraper.entities;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,7 +47,19 @@ public class Place{
 	private Boolean isFestival = false;
 
 	@Transient
-	private int sumConcerts = 5;
+	private LocalDateTime nextConcert = null;
+
+	@Transient
+	private LocalDateTime farthestConcert = null;
+
+	@Transient
+	private int highestPrice = -1;
+
+	@Transient
+	private int lowestPrice = -1;
+
+	@Transient
+	private List<Genre> genres = new ArrayList<>();
 
 	//--------------construct--------------\\
 
@@ -54,16 +68,52 @@ public class Place{
     }
 
 	//--------------getters & setters--------------\\
-	public int getSumConcerts() {
-		return sumConcerts;
-	}
 
-	public void setSumConcerts(int sumConcerts) {
-		this.sumConcerts = sumConcerts;
-	}
+
+	
 
 	public String getImage(){
 		 return this.image;
+	}
+
+	public LocalDateTime getNextConcert() {
+		return nextConcert;
+	}
+
+	public void setNextConcert(LocalDateTime nextConcert) {
+		this.nextConcert = nextConcert;
+	}
+
+	public LocalDateTime getFarthestConcert() {
+		return farthestConcert;
+	}
+
+	public void setFarthestConcert(LocalDateTime farthestConcert) {
+		this.farthestConcert = farthestConcert;
+	}
+
+	public int getHighestPrice() {
+		return highestPrice;
+	}
+
+	public void setHighestPrice(int highestPrice) {
+		this.highestPrice = highestPrice;
+	}
+
+	public int getLowestPrice() {
+		return lowestPrice;
+	}
+
+	public void setLowestPrice(int lowestPrice) {
+		this.lowestPrice = lowestPrice;
+	}
+
+	public List<Genre> getGenres() {
+		return genres;
+	}
+
+	public void setGenres(List<Genre> genres) {
+		this.genres = genres;
 	}
 
 	public void setImage (String image){
