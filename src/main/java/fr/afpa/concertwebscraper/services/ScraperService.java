@@ -11,6 +11,8 @@ import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -75,21 +77,40 @@ public class ScraperService{
         return places;
 	}
 
-    public String fetchCoordinates(String address){
+    public String fetchCoordinates(String address) throws IOException{
+        // extract zipcode
+        String zip = "";
+        Pattern pattern = Pattern.compile("\\d{5}", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(address);
+        if(matcher.find()) {
+            zip = "&postcode="+matcher.group(0);
+        }
+        
+        // normalize string to match apigeoURL
         address = address.replace("[^A-Za-z0-9\\s]", " ");
         address = address.replace("'", " ");
         address = address.replace(" ", "%20");
         address = Normalizer.normalize(address, Normalizer.Form.NFD);
         address = address.replaceAll("[^\\p{ASCII}]", "");
         address = address.replaceAll("[^A-Za-z0-9%]", "");
-        try {
-            @SuppressWarnings("deprecation")
-            URL url = new URL("https://api-adresse.data.gouv.fr/search/?q="+address+"&autocomplete=1");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            // get the lat/long with geoAPI
+        return geoAPIgetLatLong("https://api-adresse.data.gouv.fr/search/?q="+address+zip+"&autocomplete=1", zip);
+    
         
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-            connection.setRequestMethod("GET");
+    }
+
+    public String  geoAPIgetLatLong(String request, String zip) throws IOException{
+        @SuppressWarnings("deprecation")
+        // request
+        URL url = new URL(request);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    
+        connection.setConnectTimeout(5000);
+        connection.setReadTimeout(5000);
+        connection.setRequestMethod("GET");
+        if(connection.getResponseCode() == 200){
+            
+            // get result
             InputStream in = new BufferedInputStream(connection.getInputStream());
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             var result = new StringBuilder();
@@ -98,21 +119,34 @@ public class ScraperService{
                 result.append(line);
             }
 
-            // Jackson main object
             ObjectMapper mapper = new ObjectMapper();
-
-            // read the json strings and convert it into JsonNode
             JsonNode node = mapper.readTree(result.toString());
 
-            String lat = node.get("features").get(0).get("geometry").get("coordinates").get(1).toString();
-            String lon = node.get("features").get(0).get("geometry").get("coordinates").get(0).toString();
-            return lat+";"+lon;
-        } 
-        catch (IOException e) {
-            e.printStackTrace();
+            // If coordinates are OK :
+            try{
+                String lat = node.get("features").get(0).get("geometry").get("coordinates").get(1).toString();
+                String lon = node.get("features").get(0).get("geometry").get("coordinates").get(0).toString();
+                return lat+";"+lon;
+            }
+            // Else get zip coordinate instead of nothing
+            catch(Exception e){
+                if (!"".equals(zip)){
+                    Pattern pattern = Pattern.compile("\\d{5}", Pattern.CASE_INSENSITIVE);
+                    Matcher matcher = pattern.matcher(zip);
+                    // get only digits of the zipcode
+                    if(matcher.find()){
+                        zip = matcher.group(0);
+                    }
+                    return geoAPIgetLatLong("https://api-adresse.data.gouv.fr/search/?q="+zip+"&type=municipality&autocomplete=1", zip);
+                }
+                else{
+                    return null;
+                }
+            }
+        }
+        else{
             return null;
-        } 
-        
+        }
     }
     
 
@@ -273,8 +307,9 @@ public class ScraperService{
 
 	public void analyzeSite() throws IOException{
         // analyze pages only if the db is empty
-        this.analyzePlaces("/concerts-par-festivals/bretagne", true);
-        this.analyzePlaces("/concerts-salles-bars/bretagne", false);
+        // this.analyzePlaces("/concerts-par-festivals/bretagne", true);
+        this.analyzePlace("/lieu-concerts/baleine-deshydratee-0", false);
+        // this.analyzePlaces("/concerts-salles-bars/bretagne", false);
         // this.analyzeGenres();
 
 
