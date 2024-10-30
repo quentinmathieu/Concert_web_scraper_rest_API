@@ -214,7 +214,7 @@ public class ScraperService{
         // analyze pages only if the db is empty
         // this.analyzePlaces("/concerts-salles-bars/bretagne", false);
         // this.analyzePlaces("/concerts-par-festivals/bretagne", true);
-        this.analyzeGenres();
+        // this.analyzeGenres();
 
 
         // this.analyzePlace("/lieu-concerts/baleine-deshydratee-0", true);

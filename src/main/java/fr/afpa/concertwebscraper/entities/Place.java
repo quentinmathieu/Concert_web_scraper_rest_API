@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name="place")
@@ -43,6 +44,9 @@ public class Place{
 	@Column(name = "isFestival")
 	private Boolean isFestival = false;
 
+	@Transient
+	private int sumConcerts = 5;
+
 	//--------------construct--------------\\
 
     public Place(){
@@ -50,6 +54,14 @@ public class Place{
     }
 
 	//--------------getters & setters--------------\\
+	public int getSumConcerts() {
+		return sumConcerts;
+	}
+
+	public void setSumConcerts(int sumConcerts) {
+		this.sumConcerts = sumConcerts;
+	}
+
 	public String getImage(){
 		 return this.image;
 	}
@@ -112,7 +124,7 @@ public class Place{
 	}
 
 	public int sumConcerts(){
-        return 0;
+        return this.concerts.size();
 	}
 
 	public List<Concert> getConcerts() {
@@ -128,6 +140,8 @@ public class Place{
 	public void addConcert(Concert concert){
 		this.concerts.add(concert);
 	}
+
+
 
 }
 
