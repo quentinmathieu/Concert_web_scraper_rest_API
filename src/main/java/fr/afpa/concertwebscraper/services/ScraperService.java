@@ -256,8 +256,6 @@ public class ScraperService{
                 Genre newGenre;
                 try {
                     newGenre = this.analyzeGenre(genre.attr("href"));
-                    // System.out.print((genre).text());
-                    // newGenre.setSumConcerts(Integer.parseInt(getFirstText(genre, ".nom i").replace("\\D", "")));
                     genres.add(newGenre);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -310,8 +308,9 @@ public class ScraperService{
 	public void analyzeSite() throws IOException{
         // analyze pages only if the db is empty
         // this.analyzePlaces("/concerts-par-festivals/bretagne", true);
+        this.analyzePlace("/lieu-concerts/baleine-deshydratee-0", false);
         // this.analyzePlaces("/concerts-salles-bars/bretagne", false);
-        this.analyzeGenres();
+        // this.analyzeGenres();
 
 
         // this.analyzePlace("/lieu-concerts/baleine-deshydratee-0", true);

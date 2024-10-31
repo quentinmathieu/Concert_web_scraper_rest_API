@@ -10,4 +10,4 @@
 
 # DONE
 
-- [x] scrap coordinates from apigeo when lon / lat are'nt OK from pages
+- [x] fix genre bug (half of genre events are null)

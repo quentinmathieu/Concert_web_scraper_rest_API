@@ -12,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name="genre")
@@ -28,9 +27,6 @@ public class Genre{
 	@OneToMany(mappedBy = "genre")
 	@JsonIgnoreProperties({"genre"})
 	private List<Concert> concerts;
-
-	@Column(name = "sum_concerts")
-	private int sumConcerts = 0;
 
 	//--------------construct--------------\\
 
@@ -71,16 +67,6 @@ public class Genre{
 	public int sumConcerts(){
         return 0;
 	}
-
-	public int getSumConcerts() {
-		return sumConcerts;
-	}
-
-	public void setSumConcerts(int sumConcerts) {
-		this.sumConcerts = sumConcerts;
-	}
-
-	
 
 }
 
