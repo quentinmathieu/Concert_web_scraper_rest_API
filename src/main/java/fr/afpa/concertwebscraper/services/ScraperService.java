@@ -228,6 +228,20 @@ public class ScraperService{
             concert.setName(removeTags(title));
             concert.setPrice(oneConcert.select(".prix span").text());
             ScraperService.managePrice(concert);
+            // set dynamic attributes of the place
+            if (place.getLowestPrice() < 0 || place.getLowestPrice() > concert.getMinPrice()){
+                place.setLowestPrice(concert.getMinPrice());
+            }
+            if (place.getHighestPrice() < 0 || place.getHighestPrice() < concert.getMaxPrice()){
+                place.setHighestPrice(concert.getMaxPrice());
+            }
+            if (place.getNextConcert() == null || place.getNextConcert().isAfter(concert.getSchedule())){
+                place.setNextConcert(concert.getSchedule());
+            }
+            if (place.getFarthestConcert() == null || place.getFarthestConcert().isBefore(concert.getSchedule())){
+                place.setFarthestConcert(concert.getSchedule());
+            }   
+            placeRepository.save(place);
             return concertRepository.save(concert);
         }
 	}
@@ -307,10 +321,9 @@ public class ScraperService{
 
 	public void analyzeSite() throws IOException{
         // analyze pages only if the db is empty
-        // this.analyzePlaces("/concerts-par-festivals/bretagne", true);
-        this.analyzePlace("/lieu-concerts/baleine-deshydratee-0", false);
-        // this.analyzePlaces("/concerts-salles-bars/bretagne", false);
-        // this.analyzeGenres();
+        this.analyzePlaces("/concerts-salles-bars/bretagne", false);
+        this.analyzePlaces("/concerts-par-festivals/bretagne", true);
+        this.analyzeGenres();
 
 
         // this.analyzePlace("/lieu-concerts/baleine-deshydratee-0", true);

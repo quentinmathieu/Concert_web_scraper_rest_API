@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -46,20 +47,20 @@ public class Place{
 	@Column(name = "isFestival")
 	private Boolean isFestival = false;
 
-	@Transient
+	@Column
 	private LocalDateTime nextConcert = null;
 
-	@Transient
+	@Column
 	private LocalDateTime farthestConcert = null;
 
-	@Transient
+	@Column
 	private int highestPrice = -1;
 
-	@Transient
+	@Column
 	private int lowestPrice = -1;
 
-	@Transient
-	private List<Genre> genres = new ArrayList<>();
+	// @JoinColumn
+	// private List<Genre> genres = new ArrayList<>();
 
 	//--------------construct--------------\\
 
@@ -108,13 +109,13 @@ public class Place{
 		this.lowestPrice = lowestPrice;
 	}
 
-	public List<Genre> getGenres() {
-		return genres;
-	}
+	// public List<Genre> getGenres() {
+	// 	return genres;
+	// }
 
-	public void setGenres(List<Genre> genres) {
-		this.genres = genres;
-	}
+	// public void setGenres(List<Genre> genres) {
+	// 	this.genres = genres;
+	// }
 
 	public void setImage (String image){
 		this.image = image;
