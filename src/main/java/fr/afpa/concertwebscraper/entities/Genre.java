@@ -1,5 +1,6 @@
 package fr.afpa.concertwebscraper.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -27,6 +29,10 @@ public class Genre{
 	@OneToMany(mappedBy = "genre")
 	@JsonIgnoreProperties({"genre"})
 	private List<Concert> concerts;
+
+	@ManyToMany(mappedBy = "genres")
+	@JsonIgnoreProperties({"genres"})
+	private List<Place> places = new ArrayList<>();
 
 	//--------------construct--------------\\
 
@@ -64,8 +70,17 @@ public class Genre{
 	}
 
 
+
 	public int sumConcerts(){
         return 0;
+	}
+
+	public List<Place> getPlaces() {
+		return places;
+	}
+
+	public void setPlaces(List<Place> places) {
+		this.places = places;
 	}
 
 }
