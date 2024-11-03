@@ -12,7 +12,7 @@ Web scraping project. Fetch concert schedules from Bretagne, France and turns it
 1. Clone this repo
 
 2. In the db folder run :
-  ```bash
+    ```bash
     docker compose up
     ```
 
