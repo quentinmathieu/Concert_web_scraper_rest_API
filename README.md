@@ -11,7 +11,12 @@ Web scraping project. Fetch concert schedules from Bretagne, France and turns it
 ### Steps :
 1. Clone this repo
 
-2. Compile and run the app :
+2. In the db folder run :
+  ```bash
+    docker compose up
+    ```
+
+4. Compile and run the app :
     ```bash
     mvn spring-boot:run
     ```
