@@ -30,9 +30,6 @@ public class Genre{
 	@JsonIgnoreProperties({"genre"})
 	private List<Concert> concerts;
 
-	@ManyToMany(mappedBy = "genres")
-	@JsonIgnoreProperties({"genres"})
-	private List<Place> places = new ArrayList<>();
 
 	//--------------construct--------------\\
 
@@ -73,14 +70,6 @@ public class Genre{
 
 	public int sumConcerts(){
         return 0;
-	}
-
-	public List<Place> getPlaces() {
-		return places;
-	}
-
-	public void setPlaces(List<Place> places) {
-		this.places = places;
 	}
 
 }

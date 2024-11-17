@@ -316,11 +316,6 @@ public class ScraperService{
         concert.setGenre(genre);
         this.concertRepository.save(concert);
         concerts.add(concert);
-        List<Genre> genresList = concert.getPlace().getGenres();
-        if (genresList.contains(genre) != true){
-            genresList.add(genre);
-        }
-        placeRepository.save(concert.getPlace());
         genreRepository.save(genre);
         return concerts;
 	}
@@ -329,7 +324,7 @@ public class ScraperService{
         // analyze pages only if the db is empty
         // this.analyzePlaces("/concerts-salles-bars/bretagne", false);
         // this.analyzePlaces("/concerts-par-festivals/bretagne", true);
-        this.analyzeGenres();
+        // this.analyzeGenres();
 
 
         // this.analyzePlace("/lieu-concerts/baleine-deshydratee-0", true);

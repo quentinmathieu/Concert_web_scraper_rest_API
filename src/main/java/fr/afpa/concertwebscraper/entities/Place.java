@@ -1,7 +1,6 @@
 package fr.afpa.concertwebscraper.entities;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,13 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -60,13 +55,6 @@ public class Place{
 
 	@Column
 	private int lowestPrice = -1;
-
-	@ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "genre_place", 
-	joinColumns = @JoinColumn(name = "place_id"), 
-	inverseJoinColumns = @JoinColumn(name = "genre_id"))
-	@JsonIgnoreProperties({"places"})
-	private List<Genre> genres = new ArrayList<>();
 
 	//--------------construct--------------\\
 
@@ -114,15 +102,6 @@ public class Place{
 	public void setLowestPrice(int lowestPrice) {
 		this.lowestPrice = lowestPrice;
 	}
-
-	public List<Genre> getGenres() {
-		return genres;
-	}
-
-	public void setGenres(List<Genre> genres) {
-		this.genres = genres;
-	}
-
 	public void setImage (String image){
 		this.image = image;
 	}
